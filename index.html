@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flame Realm P2P - Secure E2EE Chat</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <script src="https://unpkg.com/@dotlottie/player-component@latest/dist/dotlottie-player.mjs" type="module"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="dark-mode">
+
+    <canvas id="particles-canvas"></canvas>
+
+    <div class="theme-toggle-container">
+        <button id="theme-toggle-btn" class="theme-btn" onclick="toggleTheme()">☀️ Light Mode</button>
+    </div>
+
+    <div id="login-screen" class="card-container animate__animated animate__zoomIn">
+        <div class="lottie-wrapper">
+            <dotlottie-player 
+                src="https://assets2.lottiefiles.com/packages/lf20_tno6cg2e.json" 
+                background="transparent" 
+                speed="1" 
+                style="width: 50px; height: 50px;" 
+                loop 
+                autoplay>
+            </dotlottie-player>
+        </div>
+
+        <h2 class="title-animated animate__animated animate__pulse animate__infinite">Flame Realm P2P</h2>
+        
+        <div class="role-selector">
+            <label class="radio-label">
+                <input type="radio" name="role" value="server" checked onclick="toggleRoleInputs()"> 1. Server
+            </label>
+            <label class="radio-label">
+                <input type="radio" name="role" value="client" onclick="toggleRoleInputs()"> 2. Client
+            </label>
+        </div>
+
+        <div class="input-group">
+            <input type="text" id="username-input" placeholder="Username" autocomplete="off">
+            <input type="text" id="ip-input" value="127.0.0.1" placeholder="IP Address">
+            <input type="text" id="port-input" value="8765" placeholder="Port">
+        </div>
+
+        <button class="animated-btn flame-btn animate__animated animate__pulse animate__infinite" onclick="handleConnectWithAnimation(event)">Ignition / Start</button>
+
+        <div id="error-message" class="error-msg hidden"></div>
+    </div>
+
+    <div id="chat-screen" class="card-container hidden">
+        <div class="chat-header">
+            <div class="header-status">
+                <span class="status-dot"></span>
+                <h3 class="title-animated" style="margin: 0; font-size: 0.9rem;">Flame Chamber (E2EE)</h3>
+            </div>
+            <button class="theme-btn leave-btn" onclick="disconnect()">Leave</button>
+        </div>
+
+        <div class="anime-characters-bar">
+            <div class="char-card rengoku-card animate__animated animate__headShake animate__infinite" onclick="triggerCharFX(event, 'rengoku')">
+                <span class="char-avatar">🔥</span>
+                <span class="char-name">Kyojuro</span>
+            </div>
+            <div class="char-card tanjiro-card animate__animated animate__headShake animate__infinite" onclick="triggerCharFX(event, 'tanjiro')">
+                <span class="char-avatar">🌊</span>
+                <span class="char-name">Tanjiro</span>
+            </div>
+        </div>
+
+        <div id="chat-messages"></div>
+
+        <div class="input-area">
+            <input type="text" id="message-input" placeholder="Set your heart ablaze..." onkeypress="checkEnter(event)" autocomplete="off">
+            <button class="animated-btn flame-btn" onclick="sendMessageWithFX(event)">Send</button>
+        </div>
+        <div id="anime-quote" class="anime-quote-box animate__animated animate__fadeIn"></div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
