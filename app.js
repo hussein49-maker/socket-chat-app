@@ -1,6 +1,15 @@
 let ws = null;
 let username = "";
-let currentSessionKey = "InitialDefaultKey1234567890ABCDEF";
+let sessionKeys = ["InitialDefaultKey1234567890ABCDEF"];
+
+function currentKey() {
+    return sessionKeys[sessionKeys.length - 1];
+}
+
+function keyFor(kid) {
+    if (typeof kid === "number" && sessionKeys[kid]) return sessionKeys[kid];
+    return currentKey();
+}
 
 const canvas = document.getElementById('particles-canvas');
 const ctx = canvas ? canvas.getContext('2d') : null;
@@ -318,26 +327,50 @@ function decryptText(ciphertext, key) {
 function handleIncomingMessage(event) {
     try {
         const data = JSON.parse(event.data);
-        
+
         if (data.type === "INIT") {
-            currentSessionKey = data.key;
+            if (Array.isArray(data.keys)) sessionKeys = data.keys.slice();
+            else if (data.key) sessionKeys = [data.key];
+            return;
+        }
+        if (data.type === "KEY_ROTATION") {
+            sessionKeys.push(data.key);
+            appendSystemMessage("🔑 Session key rotated.");
             return;
         }
         if (data.type === "HISTORY") {
-            
-            data.messages.forEach(msg => {
-                const plainText = decryptText(msg.ciphertext, currentSessionKey);
-                appendChatMessage(msg.sender, plainText);
-            });
+            data.messages.forEach(renderIncoming);
             return;
         }
-
-        if (data.sender && data.ciphertext) {
-            
-            const plainText = decryptText(data.ciphertext, currentSessionKey);
-            appendChatMessage(data.sender, plainText);
-        }
+        renderIncoming(data);
     } catch (err) {}
+}
+
+function renderIncoming(data) {
+    if (!data || !data.sender) return;
+    const key = keyFor(data.kid);
+
+    if (data.ciphertext) {
+        appendChatMessage(data.sender, decryptText(data.ciphertext, key));
+        return;
+    }
+    if (data.audio) {
+        const b64 = decryptText(data.audio, key);
+        const url = base64ToBlobUrl(b64, data.mime || "audio/webm");
+        if (url) appendAudioMessage(data.sender, url, data.dur || 0);
+        else appendChatMessage(data.sender, "[Voice note could not be decrypted]");
+    }
+}
+
+function base64ToBlobUrl(b64, mime) {
+    try {
+        const bin = atob(b64);
+        const bytes = new Uint8Array(bin.length);
+        for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+        return URL.createObjectURL(new Blob([bytes], { type: mime }));
+    } catch (e) {
+        return null;
+    }
 }
 
 function handleDisconnect() {
@@ -361,7 +394,7 @@ function sendMessage() {
 
     if (text && ws && ws.readyState === WebSocket.OPEN) {
         
-        const ciphertext = encryptText(text, currentSessionKey);
+        const ciphertext = encryptText(text, currentKey());
 
         const payload = JSON.stringify({
             sender: username,
@@ -374,6 +407,191 @@ function sendMessage() {
         appendChatMessage(username, text);
         input.value = "";
     }
+}
+
+// ================= Voice notes (encrypted like text) =================
+let mediaRecorder = null;
+let recChunks = [];
+let recStartTime = 0;
+let recTimerInt = null;
+const MAX_RECORD_SECONDS = 60;
+
+function formatSeconds(total) {
+    const m = Math.floor(total / 60);
+    const sec = Math.floor(total % 60);
+    return `${m}:${sec.toString().padStart(2, "0")}`;
+}
+
+async function toggleRecording(event) {
+    burstFromEvent(event);
+    if (mediaRecorder && mediaRecorder.state === "recording") {
+        stopRecording();
+        return;
+    }
+    if (!navigator.mediaDevices || !window.MediaRecorder) {
+        appendSystemMessage("Voice notes are not supported in this browser.");
+        return;
+    }
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        recChunks = [];
+        mediaRecorder = new MediaRecorder(stream);
+        mediaRecorder.ondataavailable = (e) => { if (e.data.size) recChunks.push(e.data); };
+        mediaRecorder.onstop = () => {
+            stream.getTracks().forEach(t => t.stop());
+            finishRecording();
+        };
+        mediaRecorder.start();
+        recStartTime = Date.now();
+        playClickSound();
+        setRecordingUI(true);
+        recTimerInt = setInterval(() => {
+            const elapsed = (Date.now() - recStartTime) / 1000;
+            updateRecordingTimer(elapsed);
+            if (elapsed >= MAX_RECORD_SECONDS) stopRecording();
+        }, 200);
+    } catch (e) {
+        appendSystemMessage("Microphone access was denied.");
+    }
+}
+
+function stopRecording() {
+    if (recTimerInt) { clearInterval(recTimerInt); recTimerInt = null; }
+    if (mediaRecorder && mediaRecorder.state === "recording") mediaRecorder.stop();
+    setRecordingUI(false);
+}
+
+function setRecordingUI(active) {
+    const mic = document.getElementById("mic-btn");
+    const input = document.getElementById("message-input");
+    if (mic) {
+        mic.classList.toggle("recording", active);
+        mic.setAttribute("aria-label", active ? "Stop and send voice note" : "Record voice note");
+    }
+    if (input) {
+        input.disabled = active;
+        input.placeholder = active ? "Recording… 0:00" : "Set your heart ablaze...";
+        if (!active) input.focus();
+    }
+}
+
+function updateRecordingTimer(elapsed) {
+    const input = document.getElementById("message-input");
+    if (input && input.disabled) {
+        input.placeholder = `Recording… ${formatSeconds(elapsed)} 🔥`;
+    }
+}
+
+function finishRecording() {
+    const durationSec = Math.max(1, Math.round((Date.now() - recStartTime) / 1000));
+    const blob = new Blob(recChunks, { type: mediaRecorder ? mediaRecorder.mimeType : "audio/webm" });
+    recChunks = [];
+    if (!blob.size || !ws || ws.readyState !== WebSocket.OPEN) return;
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+        const base64 = String(reader.result).split(",")[1];
+        if (!base64) return;
+        // The audio bytes are encrypted with the current session key,
+        // exactly like text messages — the server only relays ciphertext.
+        const encryptedAudio = encryptText(base64, currentKey());
+        ws.send(JSON.stringify({
+            sender: username,
+            audio: encryptedAudio,
+            mime: blob.type,
+            dur: durationSec
+        }));
+        playSuccessSound();
+        appendAudioMessage(username, URL.createObjectURL(blob), durationSec);
+    };
+    reader.readAsDataURL(blob);
+}
+
+let activeAudio = null;
+
+function appendAudioMessage(sender, url, durationSec) {
+    const box = document.getElementById("chat-messages");
+    if (!box) return;
+
+    sender = String(sender);
+    const isOwn = sender === username;
+
+    const row = document.createElement("div");
+    row.className = "msg-row animate__animated animate__fadeInUp animate__faster";
+    row.classList.add(isOwn ? "own" : "other");
+    if (sender === lastMessageSender) row.classList.add("grouped");
+
+    const avatar = document.createElement("div");
+    avatar.className = "msg-avatar";
+    avatar.textContent = sender.trim().charAt(0) || "?";
+    avatar.style.backgroundColor = avatarColor(sender);
+
+    const body = document.createElement("div");
+    body.className = "msg-body";
+
+    const meta = document.createElement("div");
+    meta.className = "msg-meta";
+    const senderElem = document.createElement("span");
+    senderElem.className = "msg-sender";
+    senderElem.textContent = sender;
+    const timeElem = document.createElement("span");
+    timeElem.className = "msg-time";
+    timeElem.textContent = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    meta.appendChild(senderElem);
+    meta.appendChild(timeElem);
+
+    const bubble = document.createElement("div");
+    bubble.className = "msg audio-msg";
+
+    const audio = new Audio(url);
+
+    const playBtn = document.createElement("button");
+    playBtn.type = "button";
+    playBtn.className = "audio-play-btn";
+    playBtn.setAttribute("aria-label", "Play voice note");
+    playBtn.innerHTML = '<svg class="icon icon-play"><use href="#icon-play"/></svg>' +
+                        '<svg class="icon icon-pause"><use href="#icon-pause"/></svg>';
+
+    const eq = document.createElement("div");
+    eq.className = "audio-eq";
+    for (let i = 0; i < 7; i++) eq.appendChild(document.createElement("span"));
+
+    const durElem = document.createElement("span");
+    durElem.className = "audio-dur";
+    durElem.textContent = formatSeconds(durationSec);
+
+    playBtn.onclick = () => {
+        playClickSound();
+        if (audio.paused) {
+            if (activeAudio && activeAudio !== audio) activeAudio.pause();
+            activeAudio = audio;
+            audio.play();
+        } else {
+            audio.pause();
+        }
+    };
+    audio.onplay = () => bubble.classList.add("playing");
+    audio.onpause = () => bubble.classList.remove("playing");
+    audio.onended = () => {
+        bubble.classList.remove("playing");
+        audio.currentTime = 0;
+        durElem.textContent = formatSeconds(durationSec);
+    };
+    audio.ontimeupdate = () => {
+        if (!audio.paused) durElem.textContent = formatSeconds(audio.currentTime);
+    };
+
+    bubble.appendChild(playBtn);
+    bubble.appendChild(eq);
+    bubble.appendChild(durElem);
+
+    body.appendChild(meta);
+    body.appendChild(bubble);
+    row.appendChild(avatar);
+    row.appendChild(body);
+    box.appendChild(row);
+    box.scrollTop = box.scrollHeight;
+    lastMessageSender = sender;
 }
 
 function checkEnter(e) {
@@ -469,5 +687,6 @@ function showError(msg) {
 }
 
 function disconnect() {
+    stopRecording();
     if (ws) ws.close();
 }

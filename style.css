@@ -783,3 +783,170 @@ body.light-mode .brand-title {
         transition-duration: 0.01ms !important;
     }
 }
+
+/* ============================================================
+   Voice notes
+   ============================================================ */
+
+.mic-btn {
+    width: 46px;
+    height: 46px;
+    flex-shrink: 0;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    border: 1px solid var(--border-color);
+    background-color: var(--input-bg);
+    color: var(--text-muted);
+    font-size: 19px;
+    transition: color 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+}
+
+.mic-btn:hover {
+    color: var(--accent-color);
+    border-color: var(--accent-color);
+    transform: translateY(-1px);
+}
+
+.mic-btn.recording {
+    background: var(--flame-gradient);
+    border-color: transparent;
+    color: #fff;
+    animation: rec-pulse 1.2s ease-out infinite;
+}
+
+@keyframes rec-pulse {
+    0%   { box-shadow: 0 0 0 0 var(--glow-color); }
+    70%  { box-shadow: 0 0 0 12px rgba(255, 106, 43, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 106, 43, 0); }
+}
+
+.audio-msg {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.65rem;
+    min-width: 190px;
+    padding: 0.5rem 0.8rem;
+}
+
+.audio-play-btn {
+    width: 34px;
+    height: 34px;
+    flex-shrink: 0;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background-color: var(--accent-soft);
+    color: var(--accent-color);
+    font-size: 14px;
+    transition: transform 0.15s ease, filter 0.2s ease;
+}
+
+.msg-row.own .audio-play-btn {
+    background-color: rgba(255, 255, 255, 0.22);
+    color: #fff;
+}
+
+.audio-play-btn:hover {
+    transform: scale(1.1);
+}
+
+.audio-msg .icon-pause,
+.audio-msg.playing .icon-play {
+    display: none;
+}
+
+.audio-msg.playing .icon-pause {
+    display: block;
+}
+
+.audio-eq {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    height: 22px;
+    flex: 1;
+}
+
+.audio-eq span {
+    width: 3.5px;
+    border-radius: 2px;
+    background-color: var(--accent-color);
+    opacity: 0.75;
+    height: 30%;
+    animation: eq-bounce 1s ease-in-out infinite;
+    animation-play-state: paused;
+}
+
+.msg-row.own .audio-eq span {
+    background-color: #fff;
+}
+
+.audio-msg.playing .audio-eq span {
+    animation-play-state: running;
+}
+
+.audio-eq span:nth-child(1) { animation-delay: 0s;    height: 40%; }
+.audio-eq span:nth-child(2) { animation-delay: 0.15s; height: 75%; }
+.audio-eq span:nth-child(3) { animation-delay: 0.3s;  height: 55%; }
+.audio-eq span:nth-child(4) { animation-delay: 0.45s; height: 95%; }
+.audio-eq span:nth-child(5) { animation-delay: 0.6s;  height: 50%; }
+.audio-eq span:nth-child(6) { animation-delay: 0.75s; height: 80%; }
+.audio-eq span:nth-child(7) { animation-delay: 0.9s;  height: 35%; }
+
+@keyframes eq-bounce {
+    0%, 100% { transform: scaleY(0.5); }
+    50%      { transform: scaleY(1.25); }
+}
+
+.audio-dur {
+    font-size: 0.74rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-muted);
+    flex-shrink: 0;
+}
+
+.msg-row.own .audio-dur {
+    color: rgba(255, 255, 255, 0.85);
+}
+
+/* ============================================================
+   Extra chat animation
+   ============================================================ */
+
+.brand-mark {
+    animation: brand-float 3.5s ease-in-out infinite;
+}
+
+@keyframes brand-float {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-5px); }
+}
+
+.brand-mark-sm {
+    animation: none;
+}
+
+.flame-btn {
+    background-size: 180% 180%;
+    animation: flame-shift 5s ease infinite;
+}
+
+@keyframes flame-shift {
+    0%, 100% { background-position: 0% 50%; }
+    50%      { background-position: 100% 50%; }
+}
+
+.msg-row.own .msg {
+    background-size: 180% 180%;
+    animation: flame-shift 7s ease infinite;
+}
+
+.e2ee-badge .icon {
+    animation: lock-glow 2.8s ease-in-out infinite;
+}
+
+@keyframes lock-glow {
+    0%, 100% { filter: drop-shadow(0 0 0 transparent); }
+    50%      { filter: drop-shadow(0 0 4px var(--glow-color)); }
+}

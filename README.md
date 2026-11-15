@@ -28,15 +28,16 @@ Beyond encryption, the project focuses on **data minimalism**: nothing is writte
 | Feature | Description |
 |---|---|
 | **Silent E2EE** | Messages are encrypted/decrypted transparently in the background — no manual key exchange prompts or visible crypto clutter in the UI. |
-| **Dynamic Key Rotation** | The backend cycles session keys on a timer (`rotate_key_periodically`) to strengthen forward secrecy. |
+| **Dynamic Key Rotation** | The backend generates a fresh session key every **20 minutes** (`rotate_key_periodically`) and pushes it to all connected clients (`KEY_ROTATION` frame). Each message is tagged with the key generation (`kid`) it was encrypted under, so history stays readable across rotations. |
 | **Zero-Persistence Design** | No database, no disk writes — all state lives in memory only, for the lifetime of the room. |
 | **Automatic Memory Purging** | The instant the last participant disconnects (`len(CONNECTED_CLIENTS) == 0`), `CHAT_HISTORY.clear()` fires immediately, permanently erasing the room's history. |
 | **In-Memory Session Isolation** | Each room's session key and history are isolated from other rooms running on the same server instance. |
 
 ### ⚡ Real-Time Communication
 - Low-latency, bi-directional messaging powered by Python's `asyncio` + `websockets`.
+- **Encrypted Voice Notes** — record audio in the browser (MediaRecorder), encrypt the bytes with the active session key exactly like text, and play them back in an animated in-chat player. The server only ever relays audio ciphertext.
 - Event-driven relay architecture that broadcasts encrypted payloads to all connected peers without inspecting their contents.
-- Structured frame types (`INIT`, `HISTORY`, encrypted message payloads) for clean client/server negotiation.
+- Structured frame types (`INIT`, `HISTORY`, `KEY_ROTATION`, encrypted text/audio payloads) for clean client/server negotiation.
 
 ### 🎨 Immersive UI/UX
 - **Flame Realm Aesthetics** — animated HTML5 Canvas ember/particle effects that drift across the background.
@@ -149,6 +150,7 @@ flame-realm-e2ee/
 - [ ] Optional password-protected rooms
 - [ ] File/image sharing with client-side encryption
 - [ ] Typing indicators and read receipts
+- [x] Encrypted voice notes
 - [ ] Multi-room support with room codes
 - [ ] Configurable key-rotation interval via environment variables
 
