@@ -950,3 +950,184 @@ body.light-mode .brand-title {
     0%, 100% { filter: drop-shadow(0 0 0 transparent); }
     50%      { filter: drop-shadow(0 0 4px var(--glow-color)); }
 }
+
+/* ============================================================
+   Motion system — one shared rhythm
+   enter: 300ms spring-out · exit: 180ms ease-in (~60% of enter)
+   transform/opacity only; honors prefers-reduced-motion above
+   ============================================================ */
+
+:root {
+    --ease-spring: cubic-bezier(0.34, 1.25, 0.64, 1);
+    --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+    --dur-enter: 300ms;
+    --dur-exit: 180ms;
+}
+
+.screen-enter {
+    animation: screen-in var(--dur-enter) var(--ease-spring) both;
+}
+
+.screen-leave {
+    animation: screen-out var(--dur-exit) ease-in both;
+    pointer-events: none;
+}
+
+@keyframes screen-in {
+    from { opacity: 0; transform: scale(0.965) translateY(10px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes screen-out {
+    from { opacity: 1; transform: scale(1); }
+    to   { opacity: 0; transform: scale(0.975); }
+}
+
+.msg-row {
+    animation: msg-in 260ms var(--ease-spring) both;
+}
+
+@keyframes msg-in {
+    from { opacity: 0; transform: translateY(12px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.sys-msg {
+    animation: sys-in 320ms var(--ease-out) both;
+}
+
+@keyframes sys-in {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.error-msg.shake {
+    animation: shake-soft 360ms var(--ease-out);
+}
+
+@keyframes shake-soft {
+    0%, 100% { transform: translateX(0); }
+    25%      { transform: translateX(-5px); }
+    50%      { transform: translateX(4px); }
+    75%      { transform: translateX(-2px); }
+}
+
+.char-card:active,
+.skin-chip:active,
+.icon-btn:active,
+.leave-btn:active {
+    transform: scale(0.96);
+}
+
+#chat-messages {
+    scroll-behavior: smooth;
+}
+
+/* ============================================================
+   Chat skins
+   ============================================================ */
+
+.skin-selector {
+    margin-bottom: 1.1rem;
+}
+
+.skin-chips {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    margin-top: 0.4rem;
+}
+
+.skin-chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    padding: 0.5rem 0.6rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    background-color: var(--input-bg);
+    color: var(--text-muted);
+    font-size: 0.82rem;
+    font-weight: 600;
+    transition: border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+}
+
+.skin-chip:hover {
+    transform: translateY(-1px);
+    color: var(--text-color);
+}
+
+.skin-chip[aria-pressed="true"] {
+    border-color: var(--accent-color);
+    color: var(--text-color);
+    box-shadow: 0 0 0 1px var(--accent-color) inset, 0 0 12px var(--glow-color);
+}
+
+.skin-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.skin-flame     .skin-dot { background: linear-gradient(135deg, #ff8a3d, #d92b1a); }
+.skin-messenger .skin-dot { background: linear-gradient(135deg, #00b2ff, #a033ff); }
+.skin-whatsapp  .skin-dot { background: linear-gradient(135deg, #25d366, #128c7e); }
+.skin-telegram  .skin-dot { background: linear-gradient(135deg, #54c3f1, #2aabee); }
+
+/* Messenger — blue/violet */
+body[data-skin="messenger"] {
+    --flame-gradient: linear-gradient(135deg, #00b2ff 0%, #006aff 55%, #a033ff 100%);
+    --accent-color: #0a7cff;
+    --accent-soft: rgba(10, 124, 255, 0.14);
+    --glow-color: rgba(10, 124, 255, 0.30);
+    --bg-glow: rgba(10, 124, 255, 0.16);
+}
+body.light-mode[data-skin="messenger"] {
+    --accent-color: #0064e0;
+    --accent-soft: rgba(0, 100, 224, 0.10);
+    --glow-color: rgba(0, 100, 224, 0.20);
+}
+body[data-skin="messenger"] .brand-title {
+    background-image: linear-gradient(135deg, #00b2ff, #a033ff);
+}
+
+/* WhatsApp — green */
+body[data-skin="whatsapp"] {
+    --flame-gradient: linear-gradient(135deg, #25d366 0%, #1daa61 60%, #128c7e 100%);
+    --accent-color: #25d366;
+    --accent-soft: rgba(37, 211, 102, 0.14);
+    --glow-color: rgba(37, 211, 102, 0.28);
+    --bg-glow: rgba(37, 211, 102, 0.14);
+}
+body.light-mode[data-skin="whatsapp"] {
+    --accent-color: #128c5e;
+    --accent-soft: rgba(18, 140, 94, 0.10);
+    --glow-color: rgba(18, 140, 94, 0.20);
+}
+body[data-skin="whatsapp"] .brand-title {
+    background-image: linear-gradient(135deg, #3ddf7c, #128c7e);
+}
+
+/* Telegram — sky */
+body[data-skin="telegram"] {
+    --flame-gradient: linear-gradient(135deg, #54c3f1 0%, #2aabee 60%, #1e96d1 100%);
+    --accent-color: #2aabee;
+    --accent-soft: rgba(42, 171, 238, 0.14);
+    --glow-color: rgba(42, 171, 238, 0.28);
+    --bg-glow: rgba(42, 171, 238, 0.14);
+}
+body.light-mode[data-skin="telegram"] {
+    --accent-color: #1687c4;
+    --accent-soft: rgba(22, 135, 196, 0.10);
+    --glow-color: rgba(22, 135, 196, 0.20);
+}
+body[data-skin="telegram"] .brand-title {
+    background-image: linear-gradient(135deg, #54c3f1, #1e96d1);
+}
+
+/* The anime bar belongs to the Flame skin only */
+body:not([data-skin="flame"]) .anime-characters-bar {
+    display: none;
+}
