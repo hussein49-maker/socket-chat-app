@@ -29,6 +29,9 @@
         <symbol id="icon-send" viewBox="0 0 24 24">
             <path d="M3.400 20.400 21 12.900a1 1 0 0 0 0-1.800L3.400 3.600a1 1 0 0 0-1.400 1.100L3.800 11l9.200 1-9.200 1L2 19.300a1 1 0 0 0 1.400 1.100z"/>
         </symbol>
+        <symbol id="icon-palette" viewBox="0 0 24 24">
+            <path d="M12 2a10 10 0 0 0 0 20h1.500a2.500 2.500 0 0 0 1.870-4.160c-.480-.540-.100-1.340.620-1.340H18a4 4 0 0 0 4-4C22 6.480 17.520 2 12 2zM6.500 13a1.500 1.500 0 1 1 0-3 1.500 1.500 0 0 1 0 3zm3-4.500a1.500 1.500 0 1 1 0-3 1.500 1.500 0 0 1 0 3zm5 0a1.500 1.500 0 1 1 0-3 1.500 1.500 0 0 1 0 3zm3 4.500a1.500 1.500 0 1 1 0-3 1.500 1.500 0 0 1 0 3z"/>
+        </symbol>
         <symbol id="icon-mic" viewBox="0 0 24 24">
             <path d="M12 15a4 4 0 0 0 4-4V6a4 4 0 0 0-8 0v5a4 4 0 0 0 4 4zm6-4a1 1 0 0 1 2 0 8 8 0 0 1-7 7.900V21h2a1 1 0 0 1 0 2H9a1 1 0 0 1 0-2h2v-2.100A8 8 0 0 1 4 11a1 1 0 0 1 2 0 6 6 0 0 0 12 0z"/>
         </symbol>
@@ -47,25 +50,20 @@
 
     <!-- ============ Login ============ -->
     <main id="login-screen" class="card-container login-card screen-enter">
-        <button type="button" class="icon-btn theme-toggle" onclick="toggleTheme()" aria-label="Switch to light mode" title="Toggle theme">
-            <svg class="icon icon-sun"><use href="#icon-sun"/></svg>
-            <svg class="icon icon-moon"><use href="#icon-moon"/></svg>
-        </button>
+        <div class="login-top-actions">
+            <button type="button" class="icon-btn bg-btn" onclick="toggleBgMenu(event)" aria-label="Change background" title="Change background">
+                <svg class="icon"><use href="#icon-palette"/></svg>
+            </button>
+            <button type="button" class="icon-btn theme-toggle" onclick="toggleTheme()" aria-label="Switch to light mode" title="Toggle theme">
+                <svg class="icon icon-sun"><use href="#icon-sun"/></svg>
+                <svg class="icon icon-moon"><use href="#icon-moon"/></svg>
+            </button>
+        </div>
 
         <div class="brand">
             <div class="brand-mark"><svg class="icon"><use href="#icon-flame"/></svg></div>
             <h1 class="brand-title">Flame Realm</h1>
             <p class="brand-tagline">Private rooms that burn after reading.</p>
-        </div>
-
-        <div class="skin-selector" role="group" aria-label="Chat style">
-            <span class="field-label">Chat style</span>
-            <div class="skin-chips">
-                <button type="button" class="skin-chip skin-flame" data-skin="flame" aria-pressed="true" onclick="selectSkin('flame', event)"><span class="skin-dot"></span>Flame</button>
-                <button type="button" class="skin-chip skin-messenger" data-skin="messenger" aria-pressed="false" onclick="selectSkin('messenger', event)"><span class="skin-dot"></span>Messenger</button>
-                <button type="button" class="skin-chip skin-whatsapp" data-skin="whatsapp" aria-pressed="false" onclick="selectSkin('whatsapp', event)"><span class="skin-dot"></span>WhatsApp</button>
-                <button type="button" class="skin-chip skin-telegram" data-skin="telegram" aria-pressed="false" onclick="selectSkin('telegram', event)"><span class="skin-dot"></span>Telegram</button>
-            </div>
         </div>
 
         <form class="login-form" onsubmit="handleConnectWithAnimation(event); return false;" novalidate>
@@ -117,7 +115,7 @@
             <div class="header-status">
                 <div class="brand-mark brand-mark-sm"><svg class="icon"><use href="#icon-flame"/></svg></div>
                 <div class="header-text">
-                    <h2 class="room-title" id="room-title">Flame Chamber</h2>
+                    <h2 class="room-title">Flame Realm</h2>
                     <p class="room-subtitle">
                         <span class="status-dot"></span>
                         <span id="room-subtitle">Connected</span>
@@ -128,6 +126,9 @@
                 <span class="e2ee-badge" title="Messages are encrypted before they leave your browser">
                     <svg class="icon"><use href="#icon-lock"/></svg> E2EE
                 </span>
+                <button type="button" class="icon-btn bg-btn" onclick="toggleBgMenu(event)" aria-label="Change background" title="Change background">
+                    <svg class="icon"><use href="#icon-palette"/></svg>
+                </button>
                 <button type="button" class="icon-btn theme-toggle" onclick="toggleTheme()" aria-label="Switch to light mode" title="Toggle theme">
                     <svg class="icon icon-sun"><use href="#icon-sun"/></svg>
                     <svg class="icon icon-moon"><use href="#icon-moon"/></svg>
@@ -163,6 +164,15 @@
             </button>
         </div>
     </main>
+
+    <div id="bg-menu" class="bg-menu" role="menu" aria-label="Background">
+        <div class="bg-menu-title">Background</div>
+        <button type="button" class="bg-chip" data-bg="embers" aria-pressed="true" onclick="selectBackground('embers', event)"><span class="bg-dot bg-dot-embers"></span>Embers <small>rising sparks</small></button>
+        <button type="button" class="bg-chip" data-bg="galaxy" aria-pressed="false" onclick="selectBackground('galaxy', event)"><span class="bg-dot bg-dot-galaxy"></span>Galaxy <small>twinkling stars</small></button>
+        <button type="button" class="bg-chip" data-bg="ocean" aria-pressed="false" onclick="selectBackground('ocean', event)"><span class="bg-dot bg-dot-ocean"></span>Ocean <small>drifting bubbles</small></button>
+        <button type="button" class="bg-chip" data-bg="sakura" aria-pressed="false" onclick="selectBackground('sakura', event)"><span class="bg-dot bg-dot-sakura"></span>Sakura <small>falling petals</small></button>
+        <button type="button" class="bg-chip" data-bg="matrix" aria-pressed="false" onclick="selectBackground('matrix', event)"><span class="bg-dot bg-dot-matrix"></span>Matrix <small>digital rain</small></button>
+    </div>
 
     <script src="app.js"></script>
 </body>

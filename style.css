@@ -1076,59 +1076,59 @@ body.light-mode .brand-title {
 .skin-whatsapp  .skin-dot { background: linear-gradient(135deg, #25d366, #128c7e); }
 .skin-telegram  .skin-dot { background: linear-gradient(135deg, #54c3f1, #2aabee); }
 
-/* Messenger — blue/violet */
-body[data-skin="messenger"] {
-    --flame-gradient: linear-gradient(135deg, #00b2ff 0%, #006aff 55%, #a033ff 100%);
-    --accent-color: #0a7cff;
-    --accent-soft: rgba(10, 124, 255, 0.14);
-    --glow-color: rgba(10, 124, 255, 0.30);
-    --bg-glow: rgba(10, 124, 255, 0.16);
+/* Galaxy — indigo/violet */
+body[data-bg="galaxy"] {
+    --flame-gradient: linear-gradient(135deg, #818cf8 0%, #6366f1 55%, #a855f7 100%);
+    --accent-color: #8b5cf6;
+    --accent-soft: rgba(139, 92, 246, 0.14);
+    --glow-color: rgba(139, 92, 246, 0.30);
+    --bg-glow: rgba(139, 92, 246, 0.16);
 }
-body.light-mode[data-skin="messenger"] {
-    --accent-color: #0064e0;
-    --accent-soft: rgba(0, 100, 224, 0.10);
-    --glow-color: rgba(0, 100, 224, 0.20);
+body.light-mode[data-bg="galaxy"] {
+    --accent-color: #6d28d9;
+    --accent-soft: rgba(109, 40, 217, 0.10);
+    --glow-color: rgba(109, 40, 217, 0.20);
 }
-body[data-skin="messenger"] .brand-title {
-    background-image: linear-gradient(135deg, #00b2ff, #a033ff);
-}
-
-/* WhatsApp — green */
-body[data-skin="whatsapp"] {
-    --flame-gradient: linear-gradient(135deg, #25d366 0%, #1daa61 60%, #128c7e 100%);
-    --accent-color: #25d366;
-    --accent-soft: rgba(37, 211, 102, 0.14);
-    --glow-color: rgba(37, 211, 102, 0.28);
-    --bg-glow: rgba(37, 211, 102, 0.14);
-}
-body.light-mode[data-skin="whatsapp"] {
-    --accent-color: #128c5e;
-    --accent-soft: rgba(18, 140, 94, 0.10);
-    --glow-color: rgba(18, 140, 94, 0.20);
-}
-body[data-skin="whatsapp"] .brand-title {
-    background-image: linear-gradient(135deg, #3ddf7c, #128c7e);
+body[data-bg="galaxy"] .brand-title {
+    background-image: linear-gradient(135deg, #a5b4fc, #a855f7);
 }
 
-/* Telegram — sky */
-body[data-skin="telegram"] {
-    --flame-gradient: linear-gradient(135deg, #54c3f1 0%, #2aabee 60%, #1e96d1 100%);
-    --accent-color: #2aabee;
-    --accent-soft: rgba(42, 171, 238, 0.14);
-    --glow-color: rgba(42, 171, 238, 0.28);
-    --bg-glow: rgba(42, 171, 238, 0.14);
+/* Ocean — cyan */
+body[data-bg="ocean"] {
+    --flame-gradient: linear-gradient(135deg, #22d3ee 0%, #0ea5e9 60%, #0369a1 100%);
+    --accent-color: #06b6d4;
+    --accent-soft: rgba(6, 182, 212, 0.14);
+    --glow-color: rgba(6, 182, 212, 0.28);
+    --bg-glow: rgba(6, 182, 212, 0.14);
 }
-body.light-mode[data-skin="telegram"] {
-    --accent-color: #1687c4;
-    --accent-soft: rgba(22, 135, 196, 0.10);
-    --glow-color: rgba(22, 135, 196, 0.20);
+body.light-mode[data-bg="ocean"] {
+    --accent-color: #0284c7;
+    --accent-soft: rgba(2, 132, 199, 0.10);
+    --glow-color: rgba(2, 132, 199, 0.20);
 }
-body[data-skin="telegram"] .brand-title {
-    background-image: linear-gradient(135deg, #54c3f1, #1e96d1);
+body[data-bg="ocean"] .brand-title {
+    background-image: linear-gradient(135deg, #67e8f9, #0369a1);
+}
+
+/* Sakura — pink */
+body[data-bg="sakura"] {
+    --flame-gradient: linear-gradient(135deg, #f9a8d4 0%, #ec4899 60%, #be185d 100%);
+    --accent-color: #ec4899;
+    --accent-soft: rgba(236, 72, 153, 0.14);
+    --glow-color: rgba(236, 72, 153, 0.28);
+    --bg-glow: rgba(236, 72, 153, 0.14);
+}
+body.light-mode[data-bg="sakura"] {
+    --accent-color: #db2777;
+    --accent-soft: rgba(219, 39, 119, 0.10);
+    --glow-color: rgba(219, 39, 119, 0.20);
+}
+body[data-bg="sakura"] .brand-title {
+    background-image: linear-gradient(135deg, #f9a8d4, #be185d);
 }
 
 /* The anime bar belongs to the Flame skin only */
-body:not([data-skin="flame"]) .anime-characters-bar {
+body:not([data-bg="embers"]) .anime-characters-bar {
     display: none;
 }
 
@@ -1358,3 +1358,108 @@ body.dark-mode .msg-row.other .audio-play-btn {
     .msg-row { max-width: 86%; }
     #chat-messages { padding: 1rem 0.9rem; }
 }
+
+
+/* Matrix — green */
+body[data-bg="matrix"] {
+    --flame-gradient: linear-gradient(135deg, #4ade80 0%, #16a34a 60%, #065f46 100%);
+    --accent-color: #22c55e;
+    --accent-soft: rgba(34, 197, 94, 0.14);
+    --glow-color: rgba(34, 197, 94, 0.28);
+    --bg-glow: rgba(34, 197, 94, 0.12);
+}
+body.light-mode[data-bg="matrix"] {
+    --accent-color: #15803d;
+    --accent-soft: rgba(21, 128, 61, 0.10);
+    --glow-color: rgba(21, 128, 61, 0.20);
+}
+body[data-bg="matrix"] .brand-title {
+    background-image: linear-gradient(135deg, #86efac, #15803d);
+}
+
+/* ============================================================
+   Background picker menu
+   ============================================================ */
+
+.login-top-actions {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    display: flex;
+    gap: 0.45rem;
+}
+
+.bg-menu {
+    position: fixed;
+    top: 70px;
+    right: 18px;
+    z-index: 300;
+    display: none;
+    flex-direction: column;
+    gap: 0.25rem;
+    min-width: 215px;
+    padding: 0.6rem;
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 18px;
+    backdrop-filter: blur(18px) saturate(1.2);
+    -webkit-backdrop-filter: blur(18px) saturate(1.2);
+    box-shadow: var(--shadow);
+}
+
+.bg-menu.open {
+    display: flex;
+    animation: screen-in 220ms var(--ease-spring) both;
+}
+
+.bg-menu-title {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 0.15rem 0.5rem 0.35rem;
+}
+
+.bg-chip {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.5rem 0.6rem;
+    border-radius: 12px;
+    color: var(--text-color);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-align: left;
+    transition: background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.bg-chip small {
+    margin-left: auto;
+    font-size: 0.68rem;
+    font-weight: 500;
+    color: var(--text-muted);
+}
+
+.bg-chip:hover {
+    background-color: var(--accent-soft);
+}
+
+.bg-chip[aria-pressed="true"] {
+    background-color: var(--accent-soft);
+    box-shadow: 0 0 0 1px var(--accent-color) inset;
+}
+
+.bg-dot {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.25);
+}
+
+.bg-dot-embers { background: linear-gradient(135deg, #ff8a3d, #d92b1a); }
+.bg-dot-galaxy { background: linear-gradient(135deg, #818cf8, #a855f7); }
+.bg-dot-ocean  { background: linear-gradient(135deg, #67e8f9, #0369a1); }
+.bg-dot-sakura { background: linear-gradient(135deg, #f9a8d4, #be185d); }
+.bg-dot-matrix { background: linear-gradient(135deg, #86efac, #065f46); }
