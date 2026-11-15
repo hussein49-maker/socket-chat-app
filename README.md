@@ -171,6 +171,7 @@ socket-chat-app/
 ├── index.html       # Markup: login, chat, icon sprites, background menu
 ├── app.js           # Networking, crypto, voice notes, backgrounds, motion
 ├── style.css        # Theming (dark/light × 5 palettes), motion tokens
+├── LICENSE          # MIT license & copyright
 └── README.md        # This file
 ```
 
@@ -201,9 +202,13 @@ socket-chat-app/
 
 ---
 
-## 📜 License
+## 📜 License & Copyright
 
-MIT — free to use, learn from, and build upon.
+Copyright © 2026 **Hussein Abbas Asfour** ([hussein49-maker](https://github.com/hussein49-maker))
+
+This project is licensed under the **MIT License** — free to use, learn from,
+and build upon, provided the copyright notice is kept. See the [LICENSE](LICENSE)
+file for the full text.
 
 <div align="center">
 
