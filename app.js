@@ -583,11 +583,7 @@ function appendAudioMessage(sender, url, durationSec) {
     const senderElem = document.createElement("span");
     senderElem.className = "msg-sender";
     senderElem.textContent = sender;
-    const timeElem = document.createElement("span");
-    timeElem.className = "msg-time";
-    timeElem.textContent = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
     meta.appendChild(senderElem);
-    meta.appendChild(timeElem);
 
     const bubble = document.createElement("div");
     bubble.className = "msg audio-msg";
@@ -601,9 +597,20 @@ function appendAudioMessage(sender, url, durationSec) {
     playBtn.innerHTML = '<svg class="icon icon-play"><use href="#icon-play"/></svg>' +
                         '<svg class="icon icon-pause"><use href="#icon-pause"/></svg>';
 
-    const eq = document.createElement("div");
-    eq.className = "audio-eq";
-    for (let i = 0; i < 7; i++) eq.appendChild(document.createElement("span"));
+    const wave = document.createElement("div");
+    wave.className = "audio-wave";
+    const bars = [];
+    const seed = durationSec + sender.length * 3;
+    for (let i = 0; i < 24; i++) {
+        const bar = document.createElement("span");
+        bar.style.height = (22 + Math.round(Math.abs(Math.sin((i + 1) * seed * 1.7) * Math.cos(i * 0.9)) * 74)) + "%";
+        wave.appendChild(bar);
+        bars.push(bar);
+    }
+    function paintProgress(ratio) {
+        const upto = Math.floor(ratio * bars.length);
+        bars.forEach((b, i) => b.classList.toggle("played", i < upto));
+    }
 
     const durElem = document.createElement("span");
     durElem.className = "audio-dur";
@@ -625,13 +632,17 @@ function appendAudioMessage(sender, url, durationSec) {
         bubble.classList.remove("playing");
         audio.currentTime = 0;
         durElem.textContent = formatSeconds(durationSec);
+        paintProgress(0);
     };
     audio.ontimeupdate = () => {
-        if (!audio.paused) durElem.textContent = formatSeconds(audio.currentTime);
+        if (audio.paused) return;
+        durElem.textContent = formatSeconds(audio.currentTime);
+        const total = (isFinite(audio.duration) && audio.duration > 0) ? audio.duration : durationSec;
+        paintProgress(Math.min(1, audio.currentTime / total));
     };
 
     bubble.appendChild(playBtn);
-    bubble.appendChild(eq);
+    bubble.appendChild(wave);
     bubble.appendChild(durElem);
 
     body.appendChild(meta);
@@ -690,16 +701,18 @@ function appendChatMessage(sender, text) {
     senderElem.className = "msg-sender";
     senderElem.textContent = sender;
 
-    const timeElem = document.createElement("span");
-    timeElem.className = "msg-time";
-    timeElem.textContent = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-
     const textElem = document.createElement("div");
     textElem.className = "msg";
-    textElem.textContent = text;
+    const textSpan = document.createElement("span");
+    textSpan.className = "msg-text";
+    textSpan.textContent = text;
+    const timeIn = document.createElement("span");
+    timeIn.className = "msg-time-in";
+    timeIn.textContent = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    textElem.appendChild(textSpan);
+    textElem.appendChild(timeIn);
 
     meta.appendChild(senderElem);
-    meta.appendChild(timeElem);
     body.appendChild(meta);
     body.appendChild(textElem);
     row.appendChild(avatar);
