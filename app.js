@@ -60,8 +60,22 @@ for (let i = 0; i < 35; i++) {
 }
 
 function createParticleBurst(x, y) {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     for (let i = 0; i < 15; i++) {
         particles.push(new EmberParticle(x, y, true));
+    }
+}
+
+function burstFromEvent(event) {
+    if (!event) return;
+    if (event.clientX || event.clientY) {
+        createParticleBurst(event.clientX, event.clientY);
+        return;
+    }
+    const el = event.submitter || event.target;
+    if (el && el.getBoundingClientRect) {
+        const r = el.getBoundingClientRect();
+        createParticleBurst(r.left + r.width / 2, r.top + r.height / 2);
     }
 }
 
@@ -139,7 +153,7 @@ function updateAnimeQuote() {
 
 function triggerCharFX(event, char) {
     playClickSound();
-    if (event) createParticleBurst(event.clientX, event.clientY);
+    burstFromEvent(event);
     const elem = document.getElementById("anime-quote");
     if (char === 'rengoku') {
         if (elem) elem.textContent = "Flame Hashira: Kyojuro Rengoku!";
@@ -148,31 +162,42 @@ function triggerCharFX(event, char) {
     }
 }
 
+const THEME_KEY = "flame-realm-theme";
+
+function applyTheme(theme) {
+    const isLight = theme === "light";
+    document.body.classList.toggle("light-mode", isLight);
+    document.body.classList.toggle("dark-mode", !isLight);
+    document.querySelectorAll(".theme-toggle").forEach(btn => {
+        btn.setAttribute("aria-label", isLight ? "Switch to dark mode" : "Switch to light mode");
+    });
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute("content", isLight ? "#f8f1e9" : "#0c0907");
+}
+
 function toggleTheme() {
     playClickSound();
-    const body = document.body;
-    const btn = document.getElementById("theme-toggle-btn");
-    if (body.classList.contains("dark-mode")) {
-        body.classList.remove("dark-mode");
-        body.classList.add("light-mode");
-        btn.textContent = "🌙 Dark Mode";
-    } else {
-        body.classList.remove("light-mode");
-        body.classList.add("dark-mode");
-        btn.textContent = "☀️ Light Mode";
-    }
+    const next = document.body.classList.contains("dark-mode") ? "light" : "dark";
+    applyTheme(next);
+    try { localStorage.setItem(THEME_KEY, next); } catch (e) {}
 }
+
+(function initTheme() {
+    let saved = null;
+    try { saved = localStorage.getItem(THEME_KEY); } catch (e) {}
+    applyTheme(saved === "light" ? "light" : "dark");
+})();
 
 async function handleConnectWithAnimation(event) {
     playClickSound();
-    if (event) createParticleBurst(event.clientX, event.clientY);
+    burstFromEvent(event);
     updateAnimeQuote();
     await processRoleSelection();
 }
 
 function sendMessageWithFX(event) {
     playClickSound();
-    if (event) createParticleBurst(event.clientX, event.clientY);
+    burstFromEvent(event);
     updateAnimeQuote();
     sendMessage();
 }
@@ -254,7 +279,11 @@ function transitionToChat() {
             login.classList.add("hidden");
             login.classList.remove("animate__fadeOutUp");
             chat.classList.remove("hidden");
-            chat.classList.add("animate__backInDown");
+            chat.classList.add("animate__fadeInUp", "animate__faster");
+            const subtitle = document.getElementById("room-subtitle");
+            if (subtitle) subtitle.textContent = `Connected as ${username}`;
+            const input = document.getElementById("message-input");
+            if (input) input.focus();
         }, 400);
     }
 }
@@ -354,26 +383,63 @@ function checkEnter(e) {
 function wipeChat() {
     const box = document.getElementById("chat-messages");
     if (box) box.innerHTML = "";
+    lastMessageSender = null;
+}
+
+let lastMessageSender = null;
+
+function avatarColor(name) {
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) {
+        hash = (hash * 31 + name.charCodeAt(i)) % 360;
+    }
+    return `hsl(${hash}, 58%, 46%)`;
 }
 
 function appendChatMessage(sender, text) {
     const box = document.getElementById("chat-messages");
     if (!box) return;
 
-    const msgDiv = document.createElement("div");
-    msgDiv.className = "msg animate__animated animate__fadeInUp animate__faster";
-    
-    const senderElem = document.createElement("strong");
-    senderElem.style.color = "var(--accent-color)";
-    senderElem.textContent = sender + ": ";
+    sender = String(sender);
+    const isOwn = sender === username;
 
-    const textElem = document.createElement("span");
+    const row = document.createElement("div");
+    row.className = "msg-row animate__animated animate__fadeInUp animate__faster";
+    row.classList.add(isOwn ? "own" : "other");
+    if (sender === lastMessageSender) row.classList.add("grouped");
+
+    const avatar = document.createElement("div");
+    avatar.className = "msg-avatar";
+    avatar.textContent = sender.trim().charAt(0) || "?";
+    avatar.style.backgroundColor = avatarColor(sender);
+
+    const body = document.createElement("div");
+    body.className = "msg-body";
+
+    const meta = document.createElement("div");
+    meta.className = "msg-meta";
+
+    const senderElem = document.createElement("span");
+    senderElem.className = "msg-sender";
+    senderElem.textContent = sender;
+
+    const timeElem = document.createElement("span");
+    timeElem.className = "msg-time";
+    timeElem.textContent = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+
+    const textElem = document.createElement("div");
+    textElem.className = "msg";
     textElem.textContent = text;
 
-    msgDiv.appendChild(senderElem);
-    msgDiv.appendChild(textElem);
-    box.appendChild(msgDiv);
+    meta.appendChild(senderElem);
+    meta.appendChild(timeElem);
+    body.appendChild(meta);
+    body.appendChild(textElem);
+    row.appendChild(avatar);
+    row.appendChild(body);
+    box.appendChild(row);
     box.scrollTop = box.scrollHeight;
+    lastMessageSender = sender;
 }
 
 function appendSystemMessage(text) {
@@ -385,6 +451,7 @@ function appendSystemMessage(text) {
     msgDiv.textContent = text;
     box.appendChild(msgDiv);
     box.scrollTop = box.scrollHeight;
+    lastMessageSender = null;
 }
 
 function showError(msg) {
