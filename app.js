@@ -1,3 +1,13 @@
+const SKIN_KEY = "flame-realm-skin";
+
+const SKINS = {
+    flame:     { name: "Flame Realm", room: "Flame Chamber", particles: ["#ff5722", "#ff9800"], placeholder: "Set your heart ablaze..." },
+    messenger: { name: "Messenger",   room: "Messenger",     particles: ["#0a7cff", "#8b5cf6"], placeholder: "Type a message..." },
+    whatsapp:  { name: "WhatsApp",    room: "WhatsApp",      particles: ["#25d366", "#1daa61"], placeholder: "Type a message..." },
+    telegram:  { name: "Telegram",    room: "Telegram",      particles: ["#2aabee", "#54c3f1"], placeholder: "Write a message..." }
+};
+let currentSkin = "flame";
+
 let ws = null;
 let username = "";
 let sessionKeys = ["InitialDefaultKey1234567890ABCDEF"];
@@ -34,7 +44,8 @@ class EmberParticle {
         this.speedY = isBurst ? (Math.random() - 0.5) * 3.5 : Math.random() * 1.2 + 0.5;
         this.speedX = isBurst ? (Math.random() - 0.5) * 3.5 : (Math.random() - 0.5) * 0.8;
         this.opacity = Math.random() * 0.8 + 0.2;
-        this.color = Math.random() > 0.3 ? '#ff5722' : '#ff9800';
+        const palette = skinParticleColors();
+        this.color = palette[Math.random() > 0.3 ? 0 : 1];
         this.isBurst = isBurst;
     }
     update() {
@@ -173,6 +184,37 @@ function triggerCharFX(event, char) {
 
 const THEME_KEY = "flame-realm-theme";
 
+function applySkin(id) {
+    if (!SKINS[id]) id = "flame";
+    currentSkin = id;
+    const skin = SKINS[id];
+    document.body.dataset.skin = id;
+    document.title = `${skin.name} - Secure E2EE Chat`;
+    const brand = document.querySelector(".brand-title");
+    if (brand) brand.textContent = skin.name;
+    const room = document.getElementById("room-title");
+    if (room) room.textContent = skin.room;
+    document.querySelectorAll(".skin-chip").forEach(chip => {
+        chip.setAttribute("aria-pressed", chip.dataset.skin === id ? "true" : "false");
+    });
+    const msgInput = document.getElementById("message-input");
+    if (msgInput && !msgInput.disabled) msgInput.placeholder = skin.placeholder;
+    // Re-tint the drifting embers right away
+    particles.forEach(pt => { if (!pt.isBurst) pt.reset(); });
+}
+
+function selectSkin(id, event) {
+    playClickSound();
+    burstFromEvent(event);
+    applySkin(id);
+    try { localStorage.setItem(SKIN_KEY, id); } catch (e) {}
+}
+
+function skinParticleColors() {
+    return (SKINS[currentSkin] || SKINS.flame).particles;
+}
+
+
 function applyTheme(theme) {
     const isLight = theme === "light";
     document.body.classList.toggle("light-mode", isLight);
@@ -192,9 +234,13 @@ function toggleTheme() {
 }
 
 (function initTheme() {
-    let saved = null;
-    try { saved = localStorage.getItem(THEME_KEY); } catch (e) {}
+    let saved = null, skin = null;
+    try {
+        saved = localStorage.getItem(THEME_KEY);
+        skin = localStorage.getItem(SKIN_KEY);
+    } catch (e) {}
     applyTheme(saved === "light" ? "light" : "dark");
+    applySkin(skin || "flame");
 })();
 
 async function handleConnectWithAnimation(event) {
@@ -283,17 +329,19 @@ function transitionToChat() {
     const chat = document.getElementById("chat-screen");
 
     if (login && chat) {
-        login.classList.add("animate__fadeOutUp");
+        login.classList.remove("screen-enter");
+        login.classList.add("screen-leave");
         setTimeout(() => {
             login.classList.add("hidden");
-            login.classList.remove("animate__fadeOutUp");
-            chat.classList.remove("hidden");
-            chat.classList.add("animate__fadeInUp", "animate__faster");
+            login.classList.remove("screen-leave");
+            chat.classList.remove("hidden", "screen-enter");
+            void chat.offsetWidth;
+            chat.classList.add("screen-enter");
             const subtitle = document.getElementById("room-subtitle");
             if (subtitle) subtitle.textContent = `Connected as ${username}`;
             const input = document.getElementById("message-input");
             if (input) input.focus();
-        }, 400);
+        }, 180);
     }
 }
 
@@ -380,8 +428,9 @@ function handleDisconnect() {
 
     if (login && chat) {
         chat.classList.add("hidden");
-        login.classList.remove("hidden");
-        login.classList.add("animate__zoomIn");
+        login.classList.remove("hidden", "screen-enter");
+        void login.offsetWidth;
+        login.classList.add("screen-enter");
     }
     wipeChat();
 }
@@ -470,7 +519,7 @@ function setRecordingUI(active) {
     }
     if (input) {
         input.disabled = active;
-        input.placeholder = active ? "Recording… 0:00" : "Set your heart ablaze...";
+        input.placeholder = active ? "Recording… 0:00" : (SKINS[currentSkin] || SKINS.flame).placeholder;
         if (!active) input.focus();
     }
 }
@@ -517,7 +566,7 @@ function appendAudioMessage(sender, url, durationSec) {
     const isOwn = sender === username;
 
     const row = document.createElement("div");
-    row.className = "msg-row animate__animated animate__fadeInUp animate__faster";
+    row.className = "msg-row";
     row.classList.add(isOwn ? "own" : "other");
     if (sender === lastMessageSender) row.classList.add("grouped");
 
@@ -622,7 +671,7 @@ function appendChatMessage(sender, text) {
     const isOwn = sender === username;
 
     const row = document.createElement("div");
-    row.className = "msg-row animate__animated animate__fadeInUp animate__faster";
+    row.className = "msg-row";
     row.classList.add(isOwn ? "own" : "other");
     if (sender === lastMessageSender) row.classList.add("grouped");
 
@@ -665,7 +714,7 @@ function appendSystemMessage(text) {
     if (!box) return;
 
     const msgDiv = document.createElement("div");
-    msgDiv.className = "sys-msg animate__animated animate__fadeIn";
+    msgDiv.className = "sys-msg";
     msgDiv.textContent = text;
     box.appendChild(msgDiv);
     box.scrollTop = box.scrollHeight;
@@ -678,8 +727,9 @@ function showError(msg) {
 
     if (msg) {
         errDiv.textContent = msg;
-        errDiv.classList.remove("hidden");
-        errDiv.className = "error-msg animate__animated animate__shakeX";
+        errDiv.className = "error-msg";
+        void errDiv.offsetWidth;
+        errDiv.classList.add("shake");
     } else {
         errDiv.textContent = "";
         errDiv.classList.add("hidden");

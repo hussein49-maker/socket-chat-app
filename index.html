@@ -8,7 +8,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="dark-mode">
@@ -47,7 +46,7 @@
     <canvas id="particles-canvas"></canvas>
 
     <!-- ============ Login ============ -->
-    <main id="login-screen" class="card-container login-card animate__animated animate__zoomIn">
+    <main id="login-screen" class="card-container login-card screen-enter">
         <button type="button" class="icon-btn theme-toggle" onclick="toggleTheme()" aria-label="Switch to light mode" title="Toggle theme">
             <svg class="icon icon-sun"><use href="#icon-sun"/></svg>
             <svg class="icon icon-moon"><use href="#icon-moon"/></svg>
@@ -57,6 +56,16 @@
             <div class="brand-mark"><svg class="icon"><use href="#icon-flame"/></svg></div>
             <h1 class="brand-title">Flame Realm</h1>
             <p class="brand-tagline">Private rooms that burn after reading.</p>
+        </div>
+
+        <div class="skin-selector" role="group" aria-label="Chat style">
+            <span class="field-label">Chat style</span>
+            <div class="skin-chips">
+                <button type="button" class="skin-chip skin-flame" data-skin="flame" aria-pressed="true" onclick="selectSkin('flame', event)"><span class="skin-dot"></span>Flame</button>
+                <button type="button" class="skin-chip skin-messenger" data-skin="messenger" aria-pressed="false" onclick="selectSkin('messenger', event)"><span class="skin-dot"></span>Messenger</button>
+                <button type="button" class="skin-chip skin-whatsapp" data-skin="whatsapp" aria-pressed="false" onclick="selectSkin('whatsapp', event)"><span class="skin-dot"></span>WhatsApp</button>
+                <button type="button" class="skin-chip skin-telegram" data-skin="telegram" aria-pressed="false" onclick="selectSkin('telegram', event)"><span class="skin-dot"></span>Telegram</button>
+            </div>
         </div>
 
         <form class="login-form" onsubmit="handleConnectWithAnimation(event); return false;" novalidate>
@@ -103,12 +112,12 @@
     </main>
 
     <!-- ============ Chat ============ -->
-    <main id="chat-screen" class="card-container hidden animate__animated">
+    <main id="chat-screen" class="card-container hidden">
         <header class="chat-header">
             <div class="header-status">
                 <div class="brand-mark brand-mark-sm"><svg class="icon"><use href="#icon-flame"/></svg></div>
                 <div class="header-text">
-                    <h2 class="room-title">Flame Chamber</h2>
+                    <h2 class="room-title" id="room-title">Flame Chamber</h2>
                     <p class="room-subtitle">
                         <span class="status-dot"></span>
                         <span id="room-subtitle">Connected</span>
@@ -139,7 +148,7 @@
                 <span class="char-avatar">🌊</span>
                 <span class="char-name">Tanjiro</span>
             </button>
-            <div id="anime-quote" class="anime-quote-box animate__animated animate__fadeIn"></div>
+            <div id="anime-quote" class="anime-quote-box"></div>
         </div>
 
         <div id="chat-messages" role="log" aria-live="polite" data-empty="No messages yet. Light the first spark."></div>
