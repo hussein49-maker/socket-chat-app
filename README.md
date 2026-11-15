@@ -171,7 +171,6 @@ socket-chat-app/
 ├── index.html       # Markup: login, chat, icon sprites, background menu
 ├── app.js           # Networking, crypto, voice notes, backgrounds, motion
 ├── style.css        # Theming (dark/light × 5 palettes), motion tokens
-├── .claude/skills/  # ui-ux-pro-max design-intelligence skill (dev tooling)
 └── README.md        # This file
 ```
 
